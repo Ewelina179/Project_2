@@ -10,7 +10,7 @@ UPTIME_MESSAGE="UPTIME"
 INFO_MESSAGE = "INFO"
 HELP_MESSAGE = "HELP"
 DISCONNECT_MESSAGE = "STOP"
-DIC={"UPTIME_MESSAGE":"UPTIME", "INFO_MESSAGE":"INFO"}
+COMM={"UPTIME_MESSAGE":"UPTIME", "INFO_MESSAGE":"INFO", "HELP_MESSAGE":"HELP", "DISCONNECT_MESSAGE":"STOP"}
 #SERVER = socket.gethostbyname(socket.gethostname())
 #ADDR = (SERVER, PORT)
 
@@ -29,11 +29,11 @@ client.connect(('localhost', 2738))
 """
 def send_uptime(y):
     data ={}
-    for x in DIC:
-        if DIC[x]==y:
+    for x in COMM:
+        if COMM[x]==y:
             data["message"]=y
             data2 = json.dumps(data)
-            print(data2)
+            #print(data2)
             client.sendall(bytes(data2,encoding="utf-8"))
             data=client.recv(1024)
             data = data.decode("utf-8")
@@ -41,3 +41,5 @@ def send_uptime(y):
 
     
 send_uptime("UPTIME")
+send_uptime("INFO")
+send_uptime("STOP")

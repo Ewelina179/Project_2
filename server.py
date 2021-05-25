@@ -33,25 +33,20 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             uptime_value={}
             uptime=end-begin
             uptime_value["Czas"]=uptime
-            print(uptime_value)
+            info={}
+            info["server version number"]="jeszcze nie wiem"
             data = conn.recv(1024)
             data = data.decode("utf-8")
             data=json.loads(data)
-            print(data)
-            print(type(data))
             if data["message"] == "UPTIME":
-                print(data)
                 data2=json.dumps(uptime_value)
-                #conn.send(data2)
-            #if not data:
-            #    break
-            #elif data=="uptime":
-            #    conn.send(uptime)
-            conn.sendall(bytes(data2,encoding="utf-8"))
-"""
-while 1:
-	client,addr = s.accept() # odebranie polaczenia
-	print 'Polaczenie z ', addr
-	client.send(time.ctime(time.time())) # wyslanie danych do klienta
-	client.close()
-"""
+                conn.send(bytes(data2, encoding="utf-8"))
+            if data["message"] == "INFO":
+                data3=json.dumps(info)
+                conn.send(bytes(data3, encoding="utf-8"))
+            if data["message"] == "STOP":
+                break
+            #conn.sendall(bytes(data2,encoding="utf-8"))#conn.send(data2)
+
+#	client.send(time.ctime(time.time())) # wyslanie danych do klienta
+#wrzuć to w loop!
