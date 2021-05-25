@@ -13,6 +13,7 @@ INFO_MESSAGE = "INFO"
 HELP_MESSAGE = "HELP"
 DISCONNECT_MESSAGE = "STOP"
 
+DIC={"message":"UPTIME", "INFO_MESSAGE":"INFO"}
 #t = time.localtime()
 #print "time.asctime(t): %s " % time.asctime(t)
 
@@ -29,12 +30,19 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print ('Klient z adresu', addres)
         print("Czas połączenia z klientem: ", end)
         while True:
+            uptime_value={}
             uptime=end-begin
+            uptime_value["Czas"]=uptime
+            print(uptime_value)
             data = conn.recv(1024)
-            if not data:
-                break
-            elif data=="uptime":
-                conn.send(uptime)
+            data = data.decode("utf-8")
+            if data == {"message":"UPTIME"}:
+                data2=json.dumps(uptime_value)
+                conn.send(data2)
+            #if not data:
+            #    break
+            #elif data=="uptime":
+            #    conn.send(uptime)
             conn.sendall(data)
 """
 while 1:

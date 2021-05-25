@@ -19,18 +19,22 @@ client.connect(('localhost', 2738))
 
 
 
-data = json.dumps(j)
+#data = json.dumps(j)
 """
     s.sendall(bytes(data,encoding="utf-8"))
     a = s.recv(1024)
     a = a.decode("utf-8")
     print ('Json: ', repr(a))
+
 """
 def send_uptime(y):
+    data ={}
     for x in DIC:
         if DIC[x]==y:
-            data = json.dumps(x)
-            client.sendall(bytes(data,encoding="utf-8"))
+            data["message"]=y
+            data2 = json.dumps(data)
+            print(data2)
+            client.sendall(bytes(data2,encoding="utf-8"))
             data=client.recv(1024)
             data = data.decode("utf-8")
             print('JSON:', repr(data))
