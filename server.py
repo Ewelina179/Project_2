@@ -36,14 +36,18 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print(uptime_value)
             data = conn.recv(1024)
             data = data.decode("utf-8")
-            if data == {"message":"UPTIME"}:
+            data=json.loads(data)
+            print(data)
+            print(type(data))
+            if data["message"] == "UPTIME":
+                print(data)
                 data2=json.dumps(uptime_value)
-                conn.send(data2)
+                #conn.send(data2)
             #if not data:
             #    break
             #elif data=="uptime":
             #    conn.send(uptime)
-            conn.sendall(data)
+            conn.sendall(bytes(data2,encoding="utf-8"))
 """
 while 1:
 	client,addr = s.accept() # odebranie polaczenia
