@@ -10,7 +10,7 @@ UPTIME_MESSAGE="UPTIME"
 INFO_MESSAGE = "INFO"
 HELP_MESSAGE = "HELP"
 DISCONNECT_MESSAGE = "STOP"
-COMM={"UPTIME_MESSAGE":"UPTIME", "INFO_MESSAGE":"INFO", "HELP_MESSAGE":"HELP", "DISCONNECT_MESSAGE":"STOP"}
+COMM=["UPTIME", "INFO", "HELP", "STOP"]
 #SERVER = socket.gethostbyname(socket.gethostname())
 #ADDR = (SERVER, PORT)
 
@@ -29,7 +29,7 @@ client.connect(('localhost', 2738))
 """
 def send_uptime(y):
     data ={}
-    for x in COMM:
+    for x in range(len(COMM)):
         if COMM[x]==y:
             data["message"]=y
             data2 = json.dumps(data)

@@ -21,20 +21,23 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
     s.bind((ip_server, port))
     begin=time.time()
-    print("Czas socketu bind: ", begin)
+    begin2=time.ctime(time.time())
+    print("Czas socketu bind: ", begin2)
     print("IP_serwera:", ip_server)
     s.listen(10)
     conn, addres=s.accept()
     with conn: 
         end=time.time()
+        end2=time.ctime(time.time())
         print ('Klient z adresu', addres)
-        print("Czas połączenia z klientem: ", end)
+        print("Czas połączenia z klientem: ", end2)
         while True:
             uptime_value={}
             uptime=end-begin
             uptime_value["Czas"]=uptime
             info={}
             info["server version number"]="jeszcze nie wiem"
+            info["data utworzenia"] = begin2
             data = conn.recv(1024)
             data = data.decode("utf-8")
             data=json.loads(data)
