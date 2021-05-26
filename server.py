@@ -8,15 +8,9 @@ port=2738
 HEADER = 64
 FORMAT = 'utf-8'
 
-UPTIME_MESSAGE="UPTIME"
-INFO_MESSAGE = "INFO"
-HELP_MESSAGE = "HELP"
-DISCONNECT_MESSAGE = "STOP"
-
-DIC={"message":"UPTIME", "INFO_MESSAGE":"INFO"}
 MESSAGES=["UPTIME", "INFO", "HELP", "STOP"]
-
-help={"UPTIME":"cos", "INFO": "cos", "STOP":"cos"}
+MESSAGES_COMM={"UPTIME":"uptime", "INFO":"info", "HELP":"help", "STOP":"Your connection is closed"}
+MESSAGES_COMM["HELP"]=[["UPTIME","cos"], ["INFO", "cos"], ["STOP", "cos"]]
 #t = time.localtime()
 #print "time.asctime(t): %s " % time.asctime(t)
 
@@ -35,26 +29,30 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print ('Klient z adresu', addres)
         print("Czas połączenia z klientem: ", end2)
         while True:
+
             uptime_value={}
             uptime=end-begin
-            uptime_value["Czas"]=uptime
+            MESSAGES_COMM["UPTIME"]=uptime
             info={}
             info["server version number"]="jeszcze nie wiem"
             info["data utworzenia"] = begin2
-            help={"UPTIME":"cos", "INFO": "cos", "STOP":"cos"}
+            MESSAGES_COMM["INFO"]=info
+
             data = conn.recv(1024)
             data = data.decode("utf-8")
             data=json.loads(data)
             print(data)
+            print(data['message'])
             for x in range(len(MESSAGES)):
+                
                 if MESSAGES[x] == data['message']:
-                    #data["message"]=y
-                    data_to_server=json.dumps(uptime_value)
+                    y=data['message']
+                    print(MESSAGES_COMM[y])
+                    data_to_server=json.dumps(MESSAGES_COMM[y])
                     conn.send(bytes(data_to_server, encoding="utf-8"))
-            
                 elif MESSAGES[x] == "STOP":
-                    break
-            conn.sendall(bytes(data_to_server,encoding="utf-8"))#conn.send(data2)
+                    conn.close()
+            conn.sendall(bytes(data_to_server,encoding="utf-8"))
 
 #	client.send(time.ctime(time.time())) # wyslanie danych do klienta
 #wrzuć to w loop!
