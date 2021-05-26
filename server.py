@@ -14,6 +14,8 @@ HELP_MESSAGE = "HELP"
 DISCONNECT_MESSAGE = "STOP"
 
 DIC={"message":"UPTIME", "INFO_MESSAGE":"INFO"}
+
+help={"UPTIME":"cos", "INFO": "cos", "STOP":"cos"}
 #t = time.localtime()
 #print "time.asctime(t): %s " % time.asctime(t)
 
@@ -38,6 +40,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             info={}
             info["server version number"]="jeszcze nie wiem"
             info["data utworzenia"] = begin2
+            help={"UPTIME":"cos", "INFO": "cos", "STOP":"cos"}
             data = conn.recv(1024)
             data = data.decode("utf-8")
             data=json.loads(data)
@@ -47,6 +50,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             if data["message"] == "INFO":
                 data3=json.dumps(info)
                 conn.send(bytes(data3, encoding="utf-8"))
+            if data["message"] == "HELP":
+                data4=json.dumps(help)
+                conn.send(bytes(data4, encoding="utf-8"))
             if data["message"] == "STOP":
                 break
             #conn.sendall(bytes(data2,encoding="utf-8"))#conn.send(data2)
