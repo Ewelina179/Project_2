@@ -27,9 +27,12 @@ def send_uptime(y):
             data = data.decode("utf-8")
             print(repr(data))
 
+
 print('You can choose command from list. Type {} to get information about commands.'.format(COMM[2]))
+
+#while True:
 z=input()
 send_uptime(z)
-#send_uptime("INFO")
-#send_uptime("INFO")
-#send_uptime("STOP")
+if z=="STOP":
+    client.close()
+
