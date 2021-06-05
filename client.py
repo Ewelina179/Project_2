@@ -6,8 +6,17 @@ COMM=["UPTIME", "INFO", "HELP", "STOP"]
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('localhost', 2738))
-
-
+"""
+def send(msg):
+    message = msg.encode(FORMAT)
+    msg_lenght = len(message)
+    send_lenght = str(msg_lenght).encode(FORMAT)
+    send_lenght += b' ' * (HEADER - len(send_lenght))
+    client.send(send_lenght)
+    client.send(message)
+    a teraz dotarło echo:
+    print(client.recv(2048).decode(FORMAT) - duży skrót - większa liczba, żeby nie tym samym portem(???)
+"""
 
 def send_uptime(y):
     data ={}
