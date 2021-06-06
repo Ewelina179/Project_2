@@ -2,6 +2,8 @@ import socket
 import json
 
 
+UTF="utf-8"
+
 COMM=["UPTIME", "INFO", "HELP", "STOP"]
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,22 +20,31 @@ def send(msg):
     print(client.recv(2048).decode(FORMAT) - duży skrót - większa liczba, żeby nie tym samym portem(???)
 """
 
-def send_uptime(y):
+def client_send(y):
     data ={}
     for x in range(len(COMM)):   
         if COMM[x]==y:
             data["message"]=y
-            data2 = json.dumps(data)
-            client.sendall(bytes(data2,encoding="utf-8"))
+            data = json.dumps(data)
+            client.sendall(bytes(data,encoding=UTF))
             data=client.recv(1024)
-            data = data.decode("utf-8")
+            data = data.decode(UTF)
             print(repr(data))
+#czy ta funckja nie powinna być jeszcze pokrojona? i chyba tu już kwestia testów integracyjnych
 
+def start():
+    print('You can choose command from list. Type {} to get information about commands.'.format(COMM[2]))
+    while True:
+        z=input()
+        client_send(z)
+        if z=="STOP":
+            client.close()
+            break
 
-print('You can choose command from list. Type {} to get information about commands.'.format(COMM[2]))
-z=input()
-send_uptime(z)
-if z=="STOP":
-    client.close()
+start()
 
+"""
+if __name__=="__main__":
+    start()
+"""
 
