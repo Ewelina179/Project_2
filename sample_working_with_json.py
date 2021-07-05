@@ -1,20 +1,18 @@
 import json
 
-f=open('users.json')
-data=json.load(f)
-#c to dane, które przyszły
-c="Ewelina"
-x=data["users"][1]["username"]
-y=data["users"]
-is_name=any(c==subvalue["username"] for subvalue in data["users"])
+def find_user(username):
+    with open('users.json') as j:
+        data=json.load(j)
+    return any(username==subvalue["username"] for subvalue in data["users"])
+
+def is_valid_password(username, password):
+    with open('users.json') as j:
+        data=json.load(j)
+        for x in data["users"]:
+            if username==x["username"]:
+                return password==x["password"]
+
+x=find_user("Ewelina")
 print(x)
+y=is_valid_password("Ewelina", "Ewelina12")
 print(y)
-print(is_name)
-f.close()
-#jeśli True to adekwatny komunikat itd., żeby podał hasło dla tego imienia
-#teraz sprawdź czy hasło jest dla tego imienia konkretnego!
-d="Ewelina12"
-is_password=[d==subvalue["password"] for subvalue in data["users"] if subvalue["username"]==c]
-print(is_password)
-#działa. tylko ten generator ogarnij
-#jeśli drugie to true to tworzę konkretny obiekt+wysyłam komunikat, że zalogowano. czy źle? czy to w komunkacie od klienta za każdym razem, że zalogowany??????????????
