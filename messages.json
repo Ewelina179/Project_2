@@ -1,0 +1,19 @@
+{
+    "users":
+        [
+            {"username": "Ewelina",
+             "messages from": [
+                 {"Michalina": "Hej!"},
+                 {"Ewelina": "Cześć!"}
+             ]
+            },
+
+            {"username": "Michalina",
+            "messages from":[
+                {"Ewelina": "Hello!"}
+            ]
+            }
+
+
+        ]
+}
