@@ -3,6 +3,8 @@ import json
 import time
 import threading
 
+from sample_working_with_json import find_user, is_valid_password
+
 #socket.gethostbyname(socket.gethostname())
 IP_SERVER="127.0.0.1"
 PORT=2738
@@ -47,14 +49,18 @@ def client(conn, address):
         func= {
             "INFO": info(begin2),
             "UPTIME": uptime(end, begin),
-            "HELP": help()
-            
+            "HELP": help(),
+            "STOP": stop(),
+            "LOG IN": log_in(conn)
         }
         data_to=func.get(a)
+        #while data_to=log_in():
+    """
         data_to_server=json.dumps(data_to)
         print(data_to)
         conn.send(bytes(data_to_server, encoding=UTF))    
         #plus handle default
+    """
             
 def uptime(end, begin):
     uptime_value={}
@@ -76,8 +82,45 @@ def help():
 def stop():
     return {"STOP":"SERVER DISCONNECTION"}
 
-def log_in():
-    pass
+def log_in(conn):
+    #data = conn.recv(1024)
+    #data = data.decode(UTF)
+    #data = json.loads(data)
+    #print(data)
+    type={"message":"please type your username:   "}
+    data_to_server=json.dumps(type)
+    conn.send(bytes(data_to_server, encoding=UTF))
+    #teraz musi pobrać username od clienta
+    data = conn.recv(1024)
+    data = data.decode(UTF)
+    data = json.loads(data)
+    username = data["username"]
+    x={"message":"Please enter your password: "}
+    y={"message":"Invalid login. Try again"}
+    if find_user(username):
+        data_to_server=json.dumps(x)
+        conn.send(bytes(data_to_server, encoding=UTF))   
+    else:
+        data_to_server=json.dumps(y)
+        conn.send(bytes(data_to_server, encoding=UTF)) 
+    #to try again trzeba ogarnąć
+    data = conn.recv(1024)
+    data = data.decode(UTF)
+    data = json.loads(data)
+    password = data["password"]
+    x={"message":"You are logged in!"}
+    y={"message": "Invalid password. Try again!"}
+    if is_valid_password(password):
+        data_to_server=json.dumps(x)
+        conn.send(bytes(data_to_server, encoding=UTF))
+        #dopisać obiekt admin lub user
+    else:
+        data_to_server=json.dumps(y)
+        conn.send(bytes(data_to_server, encoding=UTF))
+        #no i jakoś cofnąć, jak źle password wpisany
+        #plus handle default
+
+
 #na komendę log in i login sprawdz czy jest i odpowiedz adekwatnie
 #jak zwrotnie poda hasło to zaloguj - stworz obiekt ktory dziala na swoich zasobach wg zasad z klasy
 
@@ -89,7 +132,6 @@ def lst_of_msg():
 
 def logout():
     pass
-
 
 
 if __name__=="__main__":
