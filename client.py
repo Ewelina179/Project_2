@@ -63,8 +63,10 @@ def log_in():
         user_data["password"]=password
         data = json.dumps(user_data)
         client.send(bytes(data,encoding=UTF))
-        user_data.client.recv(1024)
-        if user_data["answer"]==True:
+        data=client.recv(1024)
+        data = data.decode(UTF)
+        print(data[-12:-2])
+        if data[-12:-2]=="logged in!":
             if username=="Admin": #też zawrzeć, że dowolna litera
                 user=Admin(username)
                 print("Admin logged in!")

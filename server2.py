@@ -114,9 +114,10 @@ def log_in(conn):
     data = data.decode(UTF)
     data = json.loads(data)
     password = data["password"]
+    print(password)
     x={"message":"You are logged in!"}
     y={"message": "Invalid password. Try again!"}
-    if is_valid_password(password):
+    if is_valid_password(username, password):
         data_to_server=json.dumps(x)
         conn.send(bytes(data_to_server, encoding=UTF))
         #dopisać obiekt admin lub user
