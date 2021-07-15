@@ -45,15 +45,20 @@ def log_in():
     data=client.recv(1024)
     data = data.decode(UTF)
     #print(repr(data))
-    username=input("Please again ;p: ")
+    username=input("Please enter your login ;p: ")
     print(username)
     user_data={}
     user_data["username"]=username
     data = json.dumps(user_data)
     client.send(bytes(data,encoding=UTF))
     data=client.recv(1024)
-    if data["answer"]==True:
-        password=input('Please enter your password: ')
+    data = data.decode(UTF)
+    print(data)
+    print(type(data))
+    print(data[-10:-2])
+    if data[-10:-2]=="Password":
+        password=input("Please enter your password: ")
+        print(password)
         user_data={}
         user_data["password"]=password
         data = json.dumps(user_data)

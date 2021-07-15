@@ -2,8 +2,14 @@ import socket
 import json
 import time
 import threading
+import os
 
 from sample_working_with_json import find_user, is_valid_password
+
+x=os.path.abspath('server2.py')
+print(x)
+#nie mogę odpalać servera z cmd bo coś ze ścieżkami... i nie mogę z pliku z json-ami odczytać
+
 
 #socket.gethostbyname(socket.gethostname())
 IP_SERVER="127.0.0.1"
@@ -95,7 +101,7 @@ def log_in(conn):
     data = data.decode(UTF)
     data = json.loads(data)
     username = data["username"]
-    x={"message":"Please enter your password: "}
+    x={"message":"Password"}
     y={"message":"Invalid login. Try again"}
     if find_user(username):
         data_to_server=json.dumps(x)
