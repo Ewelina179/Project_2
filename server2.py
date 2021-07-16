@@ -10,6 +10,37 @@ x=os.path.abspath('server2.py')
 print(x)
 #nie mogę odpalać servera z cmd bo coś ze ścieżkami... i nie mogę z pliku z json-ami odczytać
 
+class User():
+    def __init__(self, name):
+        self.name = name
+        #czy atrybut is admin?
+
+    def read(self,conn):
+        type={"message":"Do you want read all mesages or for who?"}
+        data_to_server=json.dumps(type)
+        conn.send(bytes(data_to_server, encoding=UTF))
+        pass #komuinikacja, że chcę od konkretnej osoby/lub wszystkie
+
+    #def read_all():
+    #    pass #komunikacja, że chcę doczytać wszystkie wiadomości
+
+    def send(self,conn):
+        pass #wysłać sygnał, że chcę wysłać komuś
+
+    def log_out(self):
+        pass
+
+#może przenieść. porozbijać na pliki.
+class Admin(User):
+    def init(self, name):
+        self.name = name
+
+    def read_user():
+        pass#czyta od kogo chce wiadomości
+
+    #def read_user_all():
+    #    pass#czyta wszystkie usera
+
 
 #socket.gethostbyname(socket.gethostname())
 IP_SERVER="127.0.0.1"
@@ -17,7 +48,7 @@ PORT=2738
 UTF="utf-8"
 VERSION_OF_SERVER=112
 
-MESSAGES={"UPTIME":"TIME OF CONNECTION WITH CLIENT APPLICATION", "INFO":"SERVER VERSION NUMBER, DATE OF SERVER CREATION(???)", "HELP":{"LIST OF AVAILABLE COMMANDS":{"UPTIME":"cos", "INFO":"cos", "STOP":"cos", "LOG IN":"wez z wyzej"}}, "STOP":"SERVER DISCONNECTION", "LOG IN":"LOG IN AND GET ACCESS TO PERSONAL DATA"}
+MESSAGES={"UPTIME":"TIME OF CONNECTION WITH CLIENT APPLICATION", "INFO":"SERVER VERSION NUMBER, DATE OF SERVER CREATION(???)", "HELP":{"LIST OF AVAILABLE COMMANDS":{"UPTIME":"cos", "INFO":"cos", "STOP":"cos", "LOG IN":"wez z wyzej"}}, "STOP":"SERVER DISCONNECTION", "LOG IN":"LOG IN AND GET ACCESS TO PERSONAL DATA", "READ":"READ YOUR MESSAGES, IF LOGGED IN", "SEND": "SEND MESSAGES TO OTHERS USERS, IF YOU ARE LOGGED IN", "READ_USER": "READ MESSAGES OTHERS MEMBERS. ONLY FOR ADMIN"}
 
 
 server=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,21 +146,33 @@ def log_in(conn):
     data = json.loads(data)
     password = data["password"]
     print(password)
-    x={"message":"You are logged in!"}
+    x={"message":"You are logged in!"}#plus co jak coś innego type
     y={"message": "Invalid password. Try again!"}
     if is_valid_password(username, password):
         data_to_server=json.dumps(x)
         conn.send(bytes(data_to_server, encoding=UTF))
-        #dopisać obiekt admin lub user
+        user=User(username)
+        x={"message": " What do you want to do? READ or SEND - please type one of mentioned"}
+        data_to_server=json.dumps(x)
+        conn.send(bytes(data_to_server, encoding=UTF))
+        data= conn.recv(1024)
+        data = data.decode(UTF)
+        data = json.loads(data)
+        #tu przyjmuję info read lub send itd. a co jak user chce jakąś informację spoza??? powinna być mozliwość odwołania do help
+        if data["message"]=="READ":
+            user.read(conn)
+        elif data["message"]=="SEND":
+            user.send(conn)
+        else:
+            data={"message": "Please type again"}#czy coś tak
+            data_to_server=json.dumps(data)
+            conn.send(bytes(data_to_server, encoding=UTF))
     else:
         data_to_server=json.dumps(y)
         conn.send(bytes(data_to_server, encoding=UTF))
         #no i jakoś cofnąć, jak źle password wpisany
         #plus handle default
 
-
-#na komendę log in i login sprawdz czy jest i odpowiedz adekwatnie
-#jak zwrotnie poda hasło to zaloguj - stworz obiekt ktory dziala na swoich zasobach wg zasad z klasy
 
 def receive_msg():
     pass

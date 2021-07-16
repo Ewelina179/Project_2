@@ -5,10 +5,42 @@ from user_classes import User, Admin
 
 UTF="utf-8"
 
-COMM=["UPTIME", "INFO", "HELP", "STOP", "LOG IN"]
+COMM=["UPTIME", "INFO", "HELP", "STOP", "LOG IN", "READ", "SEND", "READ_USER"]
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('localhost', 2738))
+
+class User:
+    def __init__(self, name):
+        self.name = name
+        
+    def read(self):
+        #chcę read
+        data = {"message": "READ"}
+        data = json.dumps(data)
+        client.send(bytes(data,encoding=UTF))
+        data=client.recv(1024)
+        data = data.decode(UTF)
+        print(data)
+        #tu muszę wybrać dalej czy all czy od kogoś i odesłać odp
+
+
+    #def read_all():
+    #    pass #komunikacja, że chcę doczytać wszystkie wiadomości
+
+    def send():
+        pass #wysłać sygnał, że chcę wysłać komuś
+
+#może przenieść. porozbijać na pliki.
+class Admin(User):
+    def init(self, name):
+        self.name = name
+
+    def read_user():
+        pass#czyta od kogo chce wiadomości
+
+    #def read_user_all():
+    #    pass#czyta wszystkie usera
 
 
 def client_send(y):
@@ -69,10 +101,19 @@ def log_in():
         if data[-12:-2]=="logged in!":
             if username=="Admin": #też zawrzeć, że dowolna litera
                 user=Admin(username)
-                print("Admin logged in!")
+                print("Admin logged in!")#potem się tym zajmę
             else:
                 user=User(username)
                 print("User logged in!")
+                data = client.recv(1024)
+                data = data.decode(UTF)
+                print(data)
+                answer=input("READ or SEND?: ")
+                if answer == "READ": #uwzględniać małe litery
+                    user.read()#???
+                elif answer == "SEND":
+                    user.send()#????
+                
         else:
             print("Invalid password! Try again!") # zrobić, żeby nie wywalało na początek
     else:
