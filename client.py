@@ -22,7 +22,28 @@ class User:
         data=client.recv(1024)
         data = data.decode(UTF)
         print(data)
-        #tu muszę wybrać dalej czy all czy od kogoś i odesłać odp
+        answer=input("Type 'ALL' or 'FROM SB'")
+        if answer=="All":
+            data = {"message": "ALL"}
+            data = json.dumps(data)
+            client.send(bytes(data, encoding=UTF))
+        elif answer=="FROM SB":
+            data = {"message": "NAME"}
+            data = json.dumps(data)
+            client.send(bytes(data, encoding=UTF))
+            data=client.recv(1024)
+            data = data.decode(UTF)
+            data = json.loads(data)
+            print(data)
+            #tu ma przyjść lista imion osób od których masz wiadomości
+            #tu ciąg dalszy komunikacji z sewerem
+        else:
+            print("Try again")
+            #tu musi cofnąć do pytania - answer, w razie co
+        data=client.recv(1024)
+        #data = json.loads(data)
+        data = data.decode(UTF)
+        print(data)
 
 
     #def read_all():
@@ -85,6 +106,7 @@ def log_in():
     client.send(bytes(data,encoding=UTF))
     data=client.recv(1024)
     data = data.decode(UTF)
+    
     print(data)
     print(type(data))
     print(data[-10:-2])
@@ -97,6 +119,7 @@ def log_in():
         client.send(bytes(data,encoding=UTF))
         data=client.recv(1024)
         data = data.decode(UTF)
+        #A MOŻE BY TAK JSON LOADS?????????????
         print(data[-12:-2])
         if data[-12:-2]=="logged in!":
             if username=="Admin": #też zawrzeć, że dowolna litera

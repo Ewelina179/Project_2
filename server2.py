@@ -19,6 +19,14 @@ class User():
         type={"message":"Do you want read all mesages or for who?"}
         data_to_server=json.dumps(type)
         conn.send(bytes(data_to_server, encoding=UTF))
+        data = conn.recv(1024)
+        data = data.decode(UTF)
+        data = json.loads(data) 
+        print(data)
+        if data["message"]=="ALL":
+            pass#odczytaj wszystkie - odeślij
+        elif data["message"]=="NAME":
+            pass#odsyłam listę z osobami, od których są wiadomości
         pass #komuinikacja, że chcę od konkretnej osoby/lub wszystkie
 
     #def read_all():
