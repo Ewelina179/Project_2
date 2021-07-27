@@ -30,7 +30,15 @@ def read_all_msg(username):
         #polskie znaki?
 
 def get_names_of_sender(username):
-    pass
+    with open('messages.json') as m:
+        data = json.load(m)
+        for x in data["users"]:
+            if username==x["username"]:
+                names=[]
+                for el in x["messages from"]: #.keys
+                    name=[x for x in el.keys()]
+                    names.append(name)
+            return names
 
 """"
 x=find_user("Ewelina")
