@@ -59,6 +59,20 @@ class User:
         data = client.recv(1024)
         data = data.decode(UTF)
         print(data)
+        question=input("Who do you want to send message?")
+        data = {"message": question}
+        data = json.dumps(data)
+        client.send(bytes(data, encoding=UTF))
+        data = client.recv(1024)
+        data = data.decode(UTF)
+        print(data)
+        question2 = input("Type message")
+        data = {"message": question2}
+        data = json.dumps(data)
+        client.send(bytes(data, encoding=UTF))
+        data = client.recv(1024)
+        data = data.decode(UTF)
+        print(data)#jeszcze nie napisałam tej części po stronie serwera
 #może przenieść. porozbijać na pliki.
 class Admin(User):
     def init(self, name):

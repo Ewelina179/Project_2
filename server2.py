@@ -3,6 +3,7 @@ import json
 import time
 import threading
 import os
+#zrób logi
 
 from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender
 
@@ -55,6 +56,14 @@ class User():
         data = data.decode(UTF)
         data = json.loads(data)
         print(data)
+        question2 = {"message": "Type message"}
+        data = json.dumps(question2)
+        conn.send(bytes(data, encoding=UTF))
+        data = conn.recv(255)#tu się to limituje???
+        data = data.decode(UTF)
+        data = json.loads(data)
+        print(data["message"])
+        #zapisać wiadomość. plus ta piekielna skzynka nieodczytanych
         pass
 
     def log_out(self):
