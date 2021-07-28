@@ -38,7 +38,22 @@ def get_names_of_sender(username):
                 for el in x["messages from"]: #.keys
                     name=[x for x in el.keys()]
                     names.append(name)
+                    #jeszcze unikalne elementy
             return names
+
+def get_messages_of_sender(username, name):
+    with open('messages.json') as m:
+        data = json.load(m)
+        for x in data["users"]:
+            if username==x["username"]:
+                msg=[]
+                for el in x["messages from"]:
+                    for key, value in el.items():
+                        if key==name:
+                            message = value
+                            msg.append(message)
+                return msg
+
 
 """"
 x=find_user("Ewelina")
@@ -46,3 +61,5 @@ print(x)
 y=is_valid_password("Ewelina", "Ewelina12")
 print(y)
 """
+x=get_messages_of_sender("Ewelina", "Michalina")
+print(x)
