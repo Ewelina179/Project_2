@@ -4,7 +4,7 @@ import time
 import threading
 import os
 
-from sample_working_with_json import find_user, is_valid_password
+from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender
 
 x=os.path.abspath('server2.py')
 print(x)
@@ -17,23 +17,45 @@ class User():
 
     def read(self,conn):
         type={"message":"Do you want read all mesages or for who?"}
-        data_to_server=json.dumps(type)
-        conn.send(bytes(data_to_server, encoding=UTF))
+        data=json.dumps(type)
+        conn.send(bytes(data, encoding=UTF))
         data = conn.recv(1024)
         data = data.decode(UTF)
         data = json.loads(data) 
         print(data)
+        #rozbić na metody
         if data["message"]=="ALL":
-            pass#odczytaj wszystkie - odeślij
-        elif data["message"]=="NAME":
-            pass#odsyłam listę z osobami, od których są wiadomości
-        pass #komuinikacja, że chcę od konkretnej osoby/lub wszystkie
+            all=read_all_msg(self.name)
+            print(all)
+            data=json.dumps(all)
+            conn.send(bytes(data, encoding=UTF))
 
-    #def read_all():
-    #    pass #komunikacja, że chcę doczytać wszystkie wiadomości
+        elif data["message"]=="NAME":
+            names=get_names_of_sender(self.name)
+            print(names)
+            lst_names={"names of sender": names}
+            data=json.dumps(lst_names)
+            conn.send(bytes(data, encoding=UTF))
+            data = conn.recv(1024)
+            data = data.decode(UTF)
+            data = json.loads(data)
+            name=data["message"]
+            print(name)
+            messages=get_messages_of_sender(self.name, name)
+            msg = {"messages from sender": messages}
+            data = json.dumps(msg)
+            conn.send(bytes(data, encoding=UTF))
+
 
     def send(self,conn):
-        pass #wysłać sygnał, że chcę wysłać komuś
+        question = {"message": "For who do you want to send message?"}
+        data = json.dumps(question)
+        conn.send(bytes(data, encoding=UTF))
+        data = conn.recv(1024)
+        data = data.decode(UTF)
+        data = json.loads(data)
+        print(data)
+        pass
 
     def log_out(self):
         pass
@@ -181,12 +203,6 @@ def log_in(conn):
         #no i jakoś cofnąć, jak źle password wpisany
         #plus handle default
 
-
-def receive_msg():
-    pass
-
-def lst_of_msg():
-    pass
 
 def logout():
     pass

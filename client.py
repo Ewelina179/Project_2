@@ -15,7 +15,6 @@ class User:
         self.name = name
         
     def read(self):
-        #chcę read
         data = {"message": "READ"}
         data = json.dumps(data)
         client.send(bytes(data,encoding=UTF))
@@ -23,7 +22,8 @@ class User:
         data = data.decode(UTF)
         print(data)
         answer=input("Type 'ALL' or 'FROM SB'")
-        if answer=="All":
+        #chyba tu rozbić na metody trzeba
+        if answer=="ALL": #uwzględnij małe litery
             data = {"message": "ALL"}
             data = json.dumps(data)
             client.send(bytes(data, encoding=UTF))
@@ -33,10 +33,17 @@ class User:
             client.send(bytes(data, encoding=UTF))
             data=client.recv(1024)
             data = data.decode(UTF)
+            #data = json.loads(data)
+            print(data)
+            from_who=input("Type name of sender")
+            data = {"message": from_who}
+            data = json.dumps(data)
+            client.send(bytes(data, encoding=UTF))
+            data = client.recv(1024)
+            data = data.decode(UTF)
             data = json.loads(data)
             print(data)
-            #tu ma przyjść lista imion osób od których masz wiadomości
-            #tu ciąg dalszy komunikacji z sewerem
+
         else:
             print("Try again")
             #tu musi cofnąć do pytania - answer, w razie co
@@ -45,13 +52,13 @@ class User:
         data = data.decode(UTF)
         print(data)
 
-
-    #def read_all():
-    #    pass #komunikacja, że chcę doczytać wszystkie wiadomości
-
-    def send():
-        pass #wysłać sygnał, że chcę wysłać komuś
-
+    def send(self):
+        data = {"message": "SEND"}
+        data = json.dumps(data)
+        client.send(bytes(data, encoding=UTF))
+        data = client.recv(1024)
+        data = data.decode(UTF)
+        print(data)
 #może przenieść. porozbijać na pliki.
 class Admin(User):
     def init(self, name):
@@ -133,9 +140,9 @@ def log_in():
                 print(data)
                 answer=input("READ or SEND?: ")
                 if answer == "READ": #uwzględniać małe litery
-                    user.read()#???
+                    user.read()
                 elif answer == "SEND":
-                    user.send()#????
+                    user.send()
                 
         else:
             print("Invalid password! Try again!") # zrobić, żeby nie wywalało na początek
