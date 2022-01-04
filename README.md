@@ -4,6 +4,8 @@
 
 Client-server application. Basics of socket programming in Python.
 
+Server supports few commands.
+
 ## Prerequisites and usage
 
 git clone https://github.com/Ewelina179/client_server_application.git
