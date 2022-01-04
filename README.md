@@ -4,7 +4,7 @@
 
 Client-server application. Basics of socket programming in Python.
 
-## Prerequisites adn usage
+## Prerequisites and usage
 
 git clone https://github.com/Ewelina179/client_server_application.git
 
