@@ -3,9 +3,8 @@ import json
 import time
 import threading
 import os
-#zrób logi
 
-from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender
+from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender, save_user
 
 x=os.path.abspath('server2.py')
 print(x)
@@ -14,7 +13,6 @@ print(x)
 class User():
     def __init__(self, name):
         self.name = name
-        #czy atrybut is admin?
 
     def read(self,conn):
         type={"message":"Do you want read all mesages or for who?"}
@@ -59,35 +57,37 @@ class User():
         question2 = {"message": "Type message"}
         data = json.dumps(question2)
         conn.send(bytes(data, encoding=UTF))
-        data = conn.recv(255)#tu się to limituje???
+        data = conn.recv(256)
         data = data.decode(UTF)
         data = json.loads(data)
         print(data["message"])
-        #zapisać wiadomość. plus ta piekielna skzynka nieodczytanych
-        pass
 
     def log_out(self):
         pass
 
-#może przenieść. porozbijać na pliki.
-class Admin(User):
-    def init(self, name):
-        self.name = name
-
-    def read_user():
-        pass#czyta od kogo chce wiadomości
-
-    #def read_user_all():
-    #    pass#czyta wszystkie usera
-
 
 #socket.gethostbyname(socket.gethostname())
-IP_SERVER="127.0.0.1"
-PORT=2738
-UTF="utf-8"
-VERSION_OF_SERVER=112
+IP_SERVER = "127.0.0.1"
+PORT = 2738
+UTF = "utf-8"
+VERSION_OF_SERVER = "0.1.0"
 
-MESSAGES={"UPTIME":"TIME OF CONNECTION WITH CLIENT APPLICATION", "INFO":"SERVER VERSION NUMBER, DATE OF SERVER CREATION(???)", "HELP":{"LIST OF AVAILABLE COMMANDS":{"UPTIME":"cos", "INFO":"cos", "STOP":"cos", "LOG IN":"wez z wyzej"}}, "STOP":"SERVER DISCONNECTION", "LOG IN":"LOG IN AND GET ACCESS TO PERSONAL DATA", "READ":"READ YOUR MESSAGES, IF LOGGED IN", "SEND": "SEND MESSAGES TO OTHERS USERS, IF YOU ARE LOGGED IN", "READ_USER": "READ MESSAGES OTHERS MEMBERS. ONLY FOR ADMIN"}
+MESSAGES = {
+    "UPTIME":"TIME OF CONNECTION WITH CLIENT APPLICATION",
+    "INFO":"SERVER VERSION NUMBER, DATE OF SERVER CREATION(???)",
+    "HELP":{
+        "LIST OF AVAILABLE COMMANDS":{
+            "UPTIME":"TIME OF CONNECTION WITH CLIENT APPLICATION",
+            "INFO":"SERVER VERSION NUMBER, DATE OF SERVER CREATION(???)",
+            "STOP":"SERVER DISCONNECTION",
+            "LOG IN":"LOG IN AND GET ACCESS TO PERSONAL DATA",
+            "REGISTER": "REGISTER USER"}},
+    "STOP":"SERVER DISCONNECTION",
+    "REGISTER": "REGISTER USER",
+    "LOG IN":"LOG IN AND GET ACCESS TO PERSONAL DATA",
+    "READ":"READ YOUR MESSAGES, IF LOGGED IN",
+    "SEND": "SEND MESSAGES TO OTHERS USERS, IF YOU ARE LOGGED IN",
+    }
 
 
 server=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,6 +109,28 @@ def start():
         thread=threading.Thread(target=client, args=(conn, address))
         thread.start()
 
+def get_command(data, end, conn):
+    a = data['message']
+    func= {
+        "INFO": info(begin2),
+        "UPTIME": uptime(end, begin),
+        "HELP": help(),
+        "STOP": stop()
+    }
+    data_to=func.get(a)
+    if a == "LOG IN":
+        log_in(conn, end)
+        #data_to_server=json.dumps(data_to)
+        #print(data_to)
+        #conn.send(bytes(data_to_server, encoding=UTF)) 
+    elif a == "REGISTER":
+        register(conn)
+    else:
+        data_to_server=json.dumps(data_to)
+        print(data_to)
+        conn.send(bytes(data_to_server, encoding=UTF)) 
+        #plus handle default
+
 def client(conn, address):
     connected=True
     while connected:
@@ -118,25 +140,9 @@ def client(conn, address):
         data = conn.recv(1024)
         data = data.decode(UTF)
         data = json.loads(data)
-        print(data)
         print(data['message'])
-        
-        a=data['message']
-        func= {
-            "INFO": info(begin2),
-            "UPTIME": uptime(end, begin),
-            "HELP": help(),
-            "STOP": stop(),
-            "LOG IN": log_in(conn)
-        }
-        data_to=func.get(a)
-        #while data_to=log_in():
-    """
-        data_to_server=json.dumps(data_to)
-        print(data_to)
-        conn.send(bytes(data_to_server, encoding=UTF))    
-        #plus handle default
-    """
+
+        get_command(data, end, conn)
             
 def uptime(end, begin):
     uptime_value={}
@@ -145,70 +151,104 @@ def uptime(end, begin):
     return MESSAGES.fromkeys(["UPTIME"], uptime)
 
 def info(begin2):
-    info={}
-    info["SERVER VERSION NUMBER"]=VERSION_OF_SERVER
+    info = {}
+    info["SERVER VERSION NUMBER"] = VERSION_OF_SERVER
     info["DATE OF SERVER CREATION"] = begin2
-    MESSAGES["INFO"]=info
+    MESSAGES["INFO"] = info
     return MESSAGES.fromkeys(["INFO"], info)
      
-#help wysyła bez "help:"". ale chyba może być
 def help():
     return MESSAGES["HELP"]["LIST OF AVAILABLE COMMANDS"]
 
 def stop():
     return {"STOP":"SERVER DISCONNECTION"}
 
-def log_in(conn):
-    #data = conn.recv(1024)
-    #data = data.decode(UTF)
-    #data = json.loads(data)
-    #print(data)
-    type={"message":"please type your username:   "}
+def register(conn):
+    type={"message":"REGISTER"}
     data_to_server=json.dumps(type)
     conn.send(bytes(data_to_server, encoding=UTF))
-    #teraz musi pobrać username od clienta
     data = conn.recv(1024)
     data = data.decode(UTF)
     data = json.loads(data)
     username = data["username"]
-    x={"message":"Password"}
-    y={"message":"Invalid login. Try again"}
-    if find_user(username):
-        data_to_server=json.dumps(x)
-        conn.send(bytes(data_to_server, encoding=UTF))   
-    else:
-        data_to_server=json.dumps(y)
-        conn.send(bytes(data_to_server, encoding=UTF)) 
-    #to try again trzeba ogarnąć
+    print(username)
+    type={"message":"Please type your password!"}
+    data_to_server=json.dumps(type)
+    conn.send(bytes(data_to_server, encoding=UTF))
     data = conn.recv(1024)
     data = data.decode(UTF)
     data = json.loads(data)
     password = data["password"]
     print(password)
-    x={"message":"You are logged in!"}#plus co jak coś innego type
-    y={"message": "Invalid password. Try again!"}
-    if is_valid_password(username, password):
-        data_to_server=json.dumps(x)
+    save_user(username, password)
+    print("good job!")
+    type={"message":"OK"}
+    data_to_server=json.dumps(type)
+    conn.send(bytes(data_to_server, encoding=UTF))
+
+
+def log_in(conn, end):
+    #data = conn.recv(1024)
+    #data = data.decode(UTF)
+    #data = json.loads(data)
+    #print(data)
+    x = True
+    while x:
+        type = {"message":"LOG IN"}
+        data_to_server=json.dumps(type)
         conn.send(bytes(data_to_server, encoding=UTF))
-        user=User(username)
-        x={"message": " What do you want to do? READ or SEND - please type one of mentioned"}
-        data_to_server=json.dumps(x)
-        conn.send(bytes(data_to_server, encoding=UTF))
-        data= conn.recv(1024)
+        data = conn.recv(1024)
         data = data.decode(UTF)
         data = json.loads(data)
-        #tu przyjmuję info read lub send itd. a co jak user chce jakąś informację spoza??? powinna być mozliwość odwołania do help
-        if data["message"]=="READ":
-            user.read(conn)
-        elif data["message"]=="SEND":
-            user.send(conn)
-        else:
-            data={"message": "Please type again"}#czy coś tak
-            data_to_server=json.dumps(data)
+        username = data["username"]
+        print(username)
+        x = {"message":"Password"}
+        y = {"message":"Invalid login. Try again"}
+        if find_user(username):
+            data_to_server=json.dumps(x)
             conn.send(bytes(data_to_server, encoding=UTF))
-    else:
-        data_to_server=json.dumps(y)
-        conn.send(bytes(data_to_server, encoding=UTF))
+        else:
+            data_to_server = json.dumps(y)
+            conn.send(bytes(data_to_server, encoding=UTF)) 
+        # to try again trzeba ogarnąć
+        data = conn.recv(1024)
+        data = data.decode(UTF)
+        data = json.loads(data)
+        password = data["password"]
+        print(password)
+        x = {"message":"You are logged in!"} # plus co jak coś innego type
+        y = {"message": "Invalid password. Try again!"}
+        if is_valid_password(username, password):
+            data_to_server = json.dumps(x)
+            conn.send(bytes(data_to_server, encoding=UTF))
+            user = User(username)
+            x = {"message": " What do you want to do? READ or SEND - please type one of mentioned or or QUIT to quit user mode."}
+            data_to_server = json.dumps(x)
+            conn.send(bytes(data_to_server, encoding=UTF))
+            data= conn.recv(1024)
+            data = data.decode(UTF)
+            data = json.loads(data)
+            print(data)
+            # tu przyjmuję info read lub send itd. a co jak user chce jakąś informację spoza??? powinna być mozliwość odwołania do help
+            if data["message"] == "READ":
+                user.read(conn)
+            elif data["message"] == "SEND":
+                user.send(conn)
+            elif data["message"] == "QUIT":
+                print("tutaj serwer1")
+                print("tutaj serwer2")
+                x = False
+                get_command(data, end, conn)
+                #x = False
+                
+
+            #else:
+            #    data={"message": "Please type again"} # czy coś tak
+            #    data_to_server=json.dumps(data)
+            #    conn.send(bytes(data_to_server, encoding=UTF))
+    #else:
+    #    data_to_server=json.dumps(y)
+    #    conn.send(bytes(data_to_server, encoding=UTF))
         #no i jakoś cofnąć, jak źle password wpisany
         #plus handle default
 
@@ -217,7 +257,7 @@ def logout():
     pass
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     start()
 
 
