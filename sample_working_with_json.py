@@ -4,6 +4,27 @@ import os
 x=os.path.abspath('users.json')
 print(x)
 
+def create_inbox(username):
+    with open('messages.json', "r") as j:
+        file = json.load(j)
+    with open('messages.json', "w") as j:
+        file["users"].append({"username": username, "messages from": []})
+        print(file)
+        print(type(file))
+        json.dump(file, j)
+
+def save_user(username, password):
+    new_user = {"username": username, "password": password}
+    with open('users.json', "r") as j:
+        file = json.load(j)
+    with open('users.json', "w") as j:
+        file["users"].append(new_user)
+        print(file)
+        print(type(file))
+        json.dump(file, j)
+    create_inbox(username)
+
+
 def find_user(username):
     x=os.path.abspath('users.json')
     with open(x) as j:
@@ -55,11 +76,12 @@ def get_messages_of_sender(username, name):
                 return msg
 
 
-""""
+"""
 x=find_user("Ewelina")
 print(x)
 y=is_valid_password("Ewelina", "Ewelina12")
 print(y)
-"""
+
 x=get_messages_of_sender("Ewelina", "Michalina")
 print(x)
+"""
