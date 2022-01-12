@@ -1,11 +1,11 @@
 import socket
 import json
-from user_classes import User, Admin
+from user_classes import User
 
 
-UTF="utf-8"
+UTF = "utf-8"
 
-COMM=["UPTIME", "INFO", "HELP", "STOP", "LOG IN", "READ", "SEND", "READ_USER"]
+COMM = ("UPTIME", "INFO", "HELP", "STOP", "LOG IN", "REGISTER", "READ", "SEND", "READ_USER")
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('localhost', 2738))
@@ -44,6 +44,7 @@ class User:
             data = json.loads(data)
             print(data)
 
+
         else:
             print("Try again")
             #tu musi cofnąć do pytania - answer, w razie co
@@ -66,7 +67,7 @@ class User:
         data = client.recv(1024)
         data = data.decode(UTF)
         print(data)
-        question2 = input("Type message")
+        question2 = input("Type message max 255 signs")
         data = {"message": question2}
         data = json.dumps(data)
         client.send(bytes(data, encoding=UTF))
@@ -74,29 +75,22 @@ class User:
         data = data.decode(UTF)
         print(data)#jeszcze nie napisałam tej części po stronie serwera
 #może przenieść. porozbijać na pliki.
-class Admin(User):
-    def init(self, name):
-        self.name = name
-
-    def read_user():
-        pass#czyta od kogo chce wiadomości
-
-    #def read_user_all():
-    #    pass#czyta wszystkie usera
-
 
 def client_send(y):
     data ={}
-    for x in range(len(COMM)):
-       # if COMM[x]=="LOG IN":
-        #    log_in()   
+    for x in range(len(COMM)): 
         if COMM[x]==y:
             data["message"]=y
             data = json.dumps(data)
             client.sendall(bytes(data,encoding=UTF))
-            #data=client.recv(1024)
-            #data = data.decode(UTF)
-            #print(repr(data))
+            data=client.recv(1024)
+            data = data.decode(UTF)
+            print(repr(data))
+            if repr(data) == {"message": "LOG IN"}:
+                log_in()
+            if repr(data) == {"message": "REGISTER"}:
+                print("tuuu")
+                register()
 #czy ta funckja nie powinna być jeszcze pokrojona? i chyba tu już kwestia testów integracyjnych
 
 def start():
@@ -106,23 +100,43 @@ def start():
         client_send(z)
         if z=="LOG IN":
             log_in()
-            
+        elif z=="REGISTER":
+            register()
         elif z=="STOP":
             client.close()
             break
         else:
-            client_send(z)#problem z pozostałymi komendami, poza log in, bo tracą "łącze" z serwerem
+            client_send(z)
 
+def register():
+    username=input("Please type your username ;p: ")
+    print(username)
+    user_data = {}
+    user_data["username"] = username
+    data = json.dumps(user_data)
+    client.send(bytes(data,encoding=UTF))
 
-def log_in():
-    #stąd czeka na info od serwera i wysyła username
     data=client.recv(1024)
     data = data.decode(UTF)
-    #print(repr(data))
-    username=input("Please enter your login ;p: ")
+    password = input("Please enter your password: ")
+    user_data = {}
+    user_data["password"] = password
+    data = json.dumps(user_data)
+    client.send(bytes(data,encoding=UTF))
+    data=client.recv(1024)
+    data = data.decode(UTF)
+    data2 = json.loads(data)
+
+    if data2== {"message": "OK"}:
+        print("You are able to login. Type command LOG IN")
+    else:
+        print("Registration failed. Try again!")
+
+def log_in():
+    username = input("Please enter your login ;p: ")
     print(username)
-    user_data={}
-    user_data["username"]=username
+    user_data = {}
+    user_data["username"] = username
     data = json.dumps(user_data)
     client.send(bytes(data,encoding=UTF))
     data=client.recv(1024)
@@ -143,21 +157,22 @@ def log_in():
         #A MOŻE BY TAK JSON LOADS?????????????
         print(data[-12:-2])
         if data[-12:-2]=="logged in!":
-            if username=="Admin": #też zawrzeć, że dowolna litera
-                user=Admin(username)
-                print("Admin logged in!")#potem się tym zajmę
-            else:
-                user=User(username)
-                print("User logged in!")
-                data = client.recv(1024)
-                data = data.decode(UTF)
-                print(data)
-                answer=input("READ or SEND?: ")
-                if answer == "READ": #uwzględniać małe litery
-                    user.read()
-                elif answer == "SEND":
-                    user.send()
-                
+            user=User(username)
+            print("User logged in!")
+            data = client.recv(1024)
+            data = data.decode(UTF)
+            print(data)
+            answer=input("READ or SEND?: ")
+            if answer == "READ": #uwzględniać małe litery
+                user.read()
+            elif answer == "SEND":
+                user.send()
+            elif answer == "QUIT":
+                data = {"message": "QUIT"}
+                data = json.dumps(data)
+                client.send(bytes(data, encoding=UTF))
+                start()
+            
         else:
             print("Invalid password! Try again!") # zrobić, żeby nie wywalało na początek
     else:
@@ -167,12 +182,7 @@ def log_out():
     pass
     #nie wie, czy wylogowanie nie bedzie w user klasie
 
-
-
-start()
-
-"""
 if __name__=="__main__":
     start()
-"""
+
 
