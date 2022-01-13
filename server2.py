@@ -4,7 +4,7 @@ import time
 import threading
 import os
 
-from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender, save_user
+from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender, save_user, check_username_is_exist
 
 x=os.path.abspath('server2.py')
 print(x)
@@ -61,6 +61,7 @@ class User():
         data = data.decode(UTF)
         data = json.loads(data)
         print(data["message"])
+
 
     def log_out(self):
         pass
@@ -171,27 +172,27 @@ def register(conn):
     data = data.decode(UTF)
     data = json.loads(data)
     username = data["username"]
-    print(username)
-    type={"message":"Please type your password!"}
-    data_to_server=json.dumps(type)
-    conn.send(bytes(data_to_server, encoding=UTF))
-    data = conn.recv(1024)
-    data = data.decode(UTF)
-    data = json.loads(data)
-    password = data["password"]
-    print(password)
-    save_user(username, password)
-    print("good job!")
-    type={"message":"OK"}
-    data_to_server=json.dumps(type)
-    conn.send(bytes(data_to_server, encoding=UTF))
-
+    if check_username_is_exist(username):
+        print(username)
+        type = {"message":"Username not exist."}
+        data_to_server=json.dumps(type)
+        conn.send(bytes(data_to_server, encoding=UTF))
+        data = conn.recv(1024)
+        data = data.decode(UTF)
+        data = json.loads(data)
+        password = data["password"]
+        print(password)
+        save_user(username, password)
+        print("good job!")
+        type={"message":"OK"}
+        data_to_server=json.dumps(type)
+        conn.send(bytes(data_to_server, encoding=UTF))
+    else:
+        type = {"message": "Username already exists!"}
+        data_to_server=json.dumps(type)
+        conn.send(bytes(data_to_server, encoding=UTF))
 
 def log_in(conn, end):
-    #data = conn.recv(1024)
-    #data = data.decode(UTF)
-    #data = json.loads(data)
-    #print(data)
     x = True
     while x:
         type = {"message":"LOG IN"}

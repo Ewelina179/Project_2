@@ -4,6 +4,12 @@ import os
 x=os.path.abspath('users.json')
 print(x)
 
+
+def check_username_is_exist(username):
+    with open('users.json', "r") as j:
+        file = json.load(j)
+        return False if any(username==subvalue["username"] for subvalue in file["users"]) else True
+
 def create_inbox(username):
     with open('messages.json', "r") as j:
         file = json.load(j)
@@ -75,6 +81,8 @@ def get_messages_of_sender(username, name):
                             msg.append(message)
                 return msg
 
+def save_message(username, message):
+    pass
 
 """
 x=find_user("Ewelina")

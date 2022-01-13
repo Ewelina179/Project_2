@@ -116,21 +116,30 @@ def register():
     data = json.dumps(user_data)
     client.send(bytes(data,encoding=UTF))
 
-    data=client.recv(1024)
-    data = data.decode(UTF)
-    password = input("Please enter your password: ")
-    user_data = {}
-    user_data["password"] = password
-    data = json.dumps(user_data)
-    client.send(bytes(data,encoding=UTF))
+
     data=client.recv(1024)
     data = data.decode(UTF)
     data2 = json.loads(data)
-
-    if data2== {"message": "OK"}:
-        print("You are able to login. Type command LOG IN")
-    else:
+    print(data2)
+    if data2 == {"message":"Username already exists!"}:
         print("Registration failed. Try again!")
+    elif data2 == {"message":"Username not exist."}:
+        password = input("Please enter your password: ")
+        user_data = {}
+        user_data["password"] = password
+        data = json.dumps(user_data)
+        client.send(bytes(data,encoding=UTF))
+        data=client.recv(1024)
+        data = data.decode(UTF)
+        data2 = json.loads(data)
+        print(data2)
+
+        if data2 == {"message": "OK"}:
+            print(data2)
+            print("You are able to login. Type command LOG IN")
+        else:
+            print(data2)
+            print("Registration failed. Try again!")
 
 def log_in():
     username = input("Please enter your login ;p: ")
