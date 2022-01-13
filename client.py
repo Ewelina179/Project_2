@@ -67,8 +67,8 @@ class User:
         data = client.recv(1024)
         data = data.decode(UTF)
         print(data)
-        question2 = input("Type message max 255 signs")
-        data = {"message": question2}
+        message = input("Type message max 255 signs")
+        data = {"message": message}
         data = json.dumps(data)
         client.send(bytes(data, encoding=UTF))
         data = client.recv(1024)
@@ -115,8 +115,6 @@ def register():
     user_data["username"] = username
     data = json.dumps(user_data)
     client.send(bytes(data,encoding=UTF))
-
-
     data=client.recv(1024)
     data = data.decode(UTF)
     data2 = json.loads(data)

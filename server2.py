@@ -4,15 +4,15 @@ import time
 import threading
 import os
 
-from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender, save_user, check_username_is_exist
+from sample_working_with_json import find_user, is_valid_password, read_all_msg, get_names_of_sender, get_messages_of_sender, save_user, check_username_is_exist, save_message
 
 x=os.path.abspath('server2.py')
 print(x)
 #nie mogę odpalać servera z cmd bo coś ze ścieżkami... i nie mogę z pliku z json-ami odczytać
 
 class User():
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, username):
+        self.username = username
 
     def read(self,conn):
         type={"message":"Do you want read all mesages or for who?"}
@@ -44,24 +44,50 @@ class User():
             msg = {"messages from sender": messages}
             data = json.dumps(msg)
             conn.send(bytes(data, encoding=UTF))
+            next_action = {"message": "Do you want to send another, read or quit?"}
+            data = json.dumps(next_action)
+            conn.send(bytes(data, encoding=UTF))
+            data = conn.recv(256)
+            data = data.decode(UTF)
+            data = json.loads(data)
 
 
     def send(self,conn):
-        question = {"message": "For who do you want to send message?"}
-        data = json.dumps(question)
-        conn.send(bytes(data, encoding=UTF))
-        data = conn.recv(1024)
-        data = data.decode(UTF)
-        data = json.loads(data)
-        print(data)
-        question2 = {"message": "Type message"}
-        data = json.dumps(question2)
-        conn.send(bytes(data, encoding=UTF))
-        data = conn.recv(256)
-        data = data.decode(UTF)
-        data = json.loads(data)
-        print(data["message"])
-
+        while True:
+        
+            question = {"message": "For who do you want to send message?"}
+            data = json.dumps(question)
+            conn.send(bytes(data, encoding=UTF))
+            data = conn.recv(1024)
+            data = data.decode(UTF)
+            data2 = json.loads(data)
+            user = data2["message"]
+            print(data2["message"])
+            print(user)
+            message = {"message": "Type message"}
+            data = json.dumps(message)
+            conn.send(bytes(data, encoding=UTF))
+            data = conn.recv(256)
+            data = data.decode(UTF)
+            data = json.loads(data)
+            message_to_save = data["message"]
+            print(message_to_save)
+            if save_message(self.username, user, message_to_save):
+                next_action = {"message": "Message send. Do you want to send another, read or quit?"}
+                data = json.dumps(next_action)
+                conn.send(bytes(data, encoding=UTF))
+                data = conn.recv(256)
+                data = data.decode(UTF)
+                data = json.loads(data)
+                # if read, if send, if quit
+            else:
+                next_action = {"message": "Message sending failed. Do you want to send another, read or quit?"}
+                data = json.dumps(next_action)
+                conn.send(bytes(data, encoding=UTF))
+                data = conn.recv(256)
+                data = data.decode(UTF)
+                data = json.loads(data)
+                # if read, if send, if quit
 
     def log_out(self):
         pass
@@ -236,8 +262,6 @@ def log_in(conn, end):
             elif data["message"] == "SEND":
                 user.send(conn)
             elif data["message"] == "QUIT":
-                print("tutaj serwer1")
-                print("tutaj serwer2")
                 x = False
                 get_command(data, end, conn)
                 #x = False

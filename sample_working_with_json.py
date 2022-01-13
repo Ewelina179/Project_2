@@ -81,8 +81,28 @@ def get_messages_of_sender(username, name):
                             msg.append(message)
                 return msg
 
-def save_message(username, message):
-    pass
+def save_message(username, user, message):
+    print(user)
+    with open('messages.json') as j:
+        print("TUTAJ")
+        file = json.load(j)
+        #for x in file["users"]:
+        #    print(file["users"])
+        #    if x["username"] == user:
+        a = [x for x in file["users"] if x["username"] == user][0]
+        if a:
+            print(a)
+            b = a["messages from"]
+            el = {}
+            el[username] = message
+            b.append(el)
+            print(b)
+            print(j)
+            with open('messages.json', 'w') as j:
+                json.dump(file, j)
+                return True
+        else:
+            return False # nie ma takiego usera
 
 """
 x=find_user("Ewelina")
