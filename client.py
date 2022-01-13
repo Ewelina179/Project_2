@@ -59,23 +59,21 @@ class User:
         client.send(bytes(data, encoding=UTF))
         data = client.recv(1024)
         data = data.decode(UTF)
-        print(data)
-        question=input("Who do you want to send message?")
+        data2 = json.loads(data)
+        users = data2["message"]
+        question=input(f"Who do you want to send message? List of users: {users}.")
         data = {"message": question}
         data = json.dumps(data)
         client.send(bytes(data, encoding=UTF))
         data = client.recv(1024)
         data = data.decode(UTF)
-        print(data)
         message = input("Type message max 255 signs")
         data = {"message": message}
         data = json.dumps(data)
         client.send(bytes(data, encoding=UTF))
         data = client.recv(1024)
         data = data.decode(UTF)
-        print(data)#jeszcze nie napisałam tej części po stronie serwera
-#może przenieść. porozbijać na pliki.
-
+    
 def client_send(y):
     data ={}
     for x in range(len(COMM)): 
@@ -103,6 +101,10 @@ def start():
         elif z=="REGISTER":
             register()
         elif z=="STOP":
+            close_msg = {}
+            close_msg["message"] = "STOP"
+            data = json.dumps(close_msg)
+            client.send(bytes(data,encoding=UTF))
             client.close()
             break
         else:
@@ -184,10 +186,6 @@ def log_in():
             print("Invalid password! Try again!") # zrobić, żeby nie wywalało na początek
     else:
         print("Invalid username! Try again!")
-
-def log_out():
-    pass
-    #nie wie, czy wylogowanie nie bedzie w user klasie
 
 if __name__=="__main__":
     start()
