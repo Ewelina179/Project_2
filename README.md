@@ -5,10 +5,11 @@
 Client-server application. Basics of socket programming in Python.
 
 Server supports few commands.
+Possibility to register, log in and send messages to registered users.
 
 ## Prerequisites and usage
 
-git clone https://github.com/Ewelina179/client_server_application.git
+git clone
 
 To open server application:
 
@@ -21,8 +22,4 @@ python client.py
 ## Stack
 
 Python
-
-## To do:
-
-Sending and receiving messages.
 
