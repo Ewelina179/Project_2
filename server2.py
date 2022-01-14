@@ -16,94 +16,92 @@ class User():
 
     def read(self, conn, end):
         while True:
-            type={"message":"Do you want read all mesages or for who?"}
-            data=json.dumps(type)
-            conn.send(bytes(data, encoding=UTF))
-            data = conn.recv(1024)
-            data = data.decode(UTF)
-            data = json.loads(data) 
+            type = {"message": "Do you want read all mesages or for who?"}
+            send(conn, type)
+            data = receive_loads(conn)
             print(data)
-            #rozbić na metody
             if data["message"]=="ALL":
-                all=read_all_msg(self.username)
+                all = read_all_msg(self.username)
                 print(all)
-                data=json.dumps(all)
-                conn.send(bytes(data, encoding=UTF))
-
+                send(conn, all)
+                continue
             elif data["message"]=="NAME":
                 names=get_names_of_sender(self.username)
                 print(names)
                 lst_names={"names of sender": names}
-                data=json.dumps(lst_names)
-                conn.send(bytes(data, encoding=UTF))
-                data = conn.recv(1024)
-                data = data.decode(UTF)
-                data = json.loads(data)
+                send(conn, data)
+                data = receive_loads(conn)
                 name=data["message"]
                 print(name)
                 messages=get_messages_of_sender(self.username, name)
                 msg = {"messages from sender": messages}
-                data = json.dumps(msg)
-                conn.send(bytes(data, encoding=UTF))
+                send(conn, msg)
                 next_action = {"message": "Do you want to send another, read or quit?"}
-                data = json.dumps(next_action)
-                conn.send(bytes(data, encoding=UTF))
-                data = conn.recv(256)
-                data = data.decode(UTF)
-                data = json.loads(data)
-
-                if data["message"] == "READ":
-                    self.read(conn)
-                elif data["message"] == "SEND":
-                    self.send(conn)
-                elif data["message"] == "QUIT":
-                    x = False
-                    get_command(data, end, conn)
-
+                send(conn, next_action)
+                data = receive_loads(conn)
+                continue
+            elif data["message"] == "QUIT":
+                data = receive_loads(conn)
+                print("2")
+                print(data)
+                get_command(data, end, conn)
+            else:
+                print("1")
+                print(data)
+                data = receive_loads(conn)
+                get_command(data, end, conn)
 
     def send(self,conn, end):
         while True:
             users = {"message": show_users()}
             print(users)
-            data = json.dumps(users)
-            conn.send(bytes(data, encoding=UTF))
-            data = conn.recv(1024)
-            data = data.decode(UTF)
-            data2 = json.loads(data)
-            user = data2["message"]
-            print(data2["message"])
+            send(conn, users)
+            data = receive_loads(conn)
+            user = data["message"]
+            print(data["message"])
             print(user)
             message = {"message": "Type message"}
-            data = json.dumps(message)
-            conn.send(bytes(data, encoding=UTF))
-            data = conn.recv(256)
-            data = data.decode(UTF)
-            data = json.loads(data)
+            send(conn, message)
+            data = receive_loads(conn)
             message_to_save = data["message"]
             print(message_to_save)
             if save_message(self.username, user, message_to_save):
                 next_action = {"message": "Message send. Do you want to send another, read or quit?"}
-                data = json.dumps(next_action)
-                conn.send(bytes(data, encoding=UTF))
-                data = conn.recv(256)
-                data = data.decode(UTF)
-                data = json.loads(data)
-                # if read, if send, if quit
+                send(conn, next_action)
+                data = receive_loads(conn)
+                if data["message"] == "READ":
+                    self.read(conn)
+                elif data["message"] == "SEND":
+                    self.send(conn, end)
+                elif data["message"] == "QUIT":
+                    data = receive_loads(conn)
+                    print("2")
+                    print(data)
+                    get_command(data, end, conn)
+                else:
+                    print("1")
+                    print(data)
+                    data = receive_loads(conn)
+                    get_command(data, end, conn)
             else:
                 next_action = {"message": "Message sending failed. Do you want to send another, read or quit?"}
-                data = json.dumps(next_action)
-                conn.send(bytes(data, encoding=UTF))
-                data = conn.recv(256)
-                data = data.decode(UTF)
-                data = json.loads(data)
+                send(conn, next_action)
+                data = receive_loads(conn)
                 if data["message"] == "READ":
                     self.read(conn)
                 elif data["message"] == "SEND":
                     self.send(conn)
                 elif data["message"] == "QUIT":
-                    x = False
-                get_command(data, end, conn)
-                
+                    data = receive_loads(conn)
+                    print("2")
+                    print(data)
+                    get_command(data, end, conn)
+                else:
+                    print("1")
+                    print(data)
+                    data = receive_loads(conn)
+                    get_command(data, end, conn)
+
 #socket.gethostbyname(socket.gethostname())
 IP_SERVER = "127.0.0.1"
 PORT = 2738
@@ -152,6 +150,8 @@ def start():
 
 def get_command(data, end, conn):
     a = data['message']
+    print("takie to")
+    print(data)
     func= {
         "INFO": info(begin2),
         "UPTIME": uptime(end, begin),
@@ -163,6 +163,8 @@ def get_command(data, end, conn):
         log_in(conn, end)
     elif a == "REGISTER":
         register(conn)
+    elif a == "QUIT":
+        quit(data, end, conn)
     else:
         data_to_server=json.dumps(data_to)
         print(data_to)
@@ -174,9 +176,7 @@ def client(conn, address):
         end=time.time()
         end2=time.ctime(end)
         print("Czas połączenia z klientem: ", end2)
-        data = conn.recv(1024)
-        data = data.decode(UTF)
-        data = json.loads(data)
+        data = receive_loads(conn)
         if data["message"] == "STOP":
             connected = False
         print(data['message'])
@@ -203,80 +203,87 @@ def close(conn):
     stop()
     conn.close()
 
+def quit(data, end, conn):
+    get_command(data, end, conn)
+
 def stop():
     return {"STOP":"SERVER DISCONNECTION"}
 
 def register(conn):
-    type={"message":"REGISTER"}
-    data_to_server=json.dumps(type)
-    conn.send(bytes(data_to_server, encoding=UTF))
-    data = conn.recv(1024)
-    data = data.decode(UTF)
-    data = json.loads(data)
+    type={"message": "REGISTER"}
+    send(conn, type)
+    data = receive_loads(conn)
     username = data["username"]
     if check_username_is_exist(username):
         print(username)
         type = {"message":"Username not exist."}
-        data_to_server=json.dumps(type)
-        conn.send(bytes(data_to_server, encoding=UTF))
-        data = conn.recv(1024)
-        data = data.decode(UTF)
-        data = json.loads(data)
+        send(conn, type)
+        data = receive_loads()
         password = data["password"]
         print(password)
         save_user(username, password)
         print("good job!")
         type={"message":"OK"}
-        data_to_server=json.dumps(type)
-        conn.send(bytes(data_to_server, encoding=UTF))
+        send(conn, type)
     else:
         type = {"message": "Username already exists!"}
-        data_to_server=json.dumps(type)
-        conn.send(bytes(data_to_server, encoding=UTF))
+        send(conn, type)
 
 def log_in(conn, end):
-    while True:
         type = {"message":"LOG IN"}
-        data_to_server=json.dumps(type)
-        conn.send(bytes(data_to_server, encoding=UTF))
-        data = conn.recv(1024)
-        data = data.decode(UTF)
-        data = json.loads(data)
+        send(conn, type)
+        data = receive_loads(conn)
         username = data["username"]
         print(username)
         x = {"message":"Password"}
         y = {"message":"Invalid login. Try again"}
         if find_user(username):
-            data_to_server=json.dumps(x)
-            conn.send(bytes(data_to_server, encoding=UTF))
+            send(conn, x)
         else:
-            data_to_server = json.dumps(y)
-            conn.send(bytes(data_to_server, encoding=UTF)) 
-        data = conn.recv(1024)
-        data = data.decode(UTF)
-        data = json.loads(data)
+            send(conn, y)
+        data = receive_loads(conn)
+        print(data)
         password = data["password"]
         print(password)
         x = {"message":"You are logged in!"}
         y = {"message": "Invalid password. Try again!"}
         if is_valid_password(username, password):
-            data_to_server = json.dumps(x)
-            conn.send(bytes(data_to_server, encoding=UTF))
+            send(conn, x)
             user = User(username)
             x = {"message": " What do you want to do? READ or SEND - please type one of mentioned or or QUIT to quit user mode."}
-            data_to_server = json.dumps(x)
-            conn.send(bytes(data_to_server, encoding=UTF))
-            data= conn.recv(1024)
-            data = data.decode(UTF)
-            data = json.loads(data)
+            send(conn, y)
+            data = receive_loads(conn)
+            print("to w kółko")
             print(data)
+        while True:
             if data["message"] == "READ":
                 user.read(conn, end)
+                continue
             elif data["message"] == "SEND":
                 user.send(conn, end)
+                continue
             elif data["message"] == "QUIT":
-                x = False
+                data = receive_loads(conn)
                 get_command(data, end, conn)
+            else:
+                data = receive_loads(conn)
+                get_command(data, end, conn)
+
+
+def send(conn, message):
+    data = json.dumps(message)
+    conn.send(bytes(data, encoding=UTF))
+
+def receive(conn):
+    data = conn.recv(1024)
+    data = data.decode(UTF)
+    return data
+
+def receive_loads(conn):
+    data = conn.recv(1024)
+    data = data.decode(UTF)
+    data = json.loads(data)
+    return data
 
 if __name__ == "__main__":
     start()

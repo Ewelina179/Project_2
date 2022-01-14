@@ -16,129 +16,108 @@ class User:
         
     def read(self):
         data = {"message": "READ"}
-        data = json.dumps(data)
-        client.send(bytes(data,encoding=UTF))
-        data=client.recv(1024)
-        data = data.decode(UTF)
+        send(data)
+        data = receive()
         print(data)
-        answer=input("Type 'ALL' or 'FROM SB'")
-        #chyba tu rozbić na metody trzeba
-        if answer=="ALL": #uwzględnij małe litery
+        answer=input("Type 'ALL' or 'FROM SB' or QUIT to quit log in mode")
+        if answer == "ALL":
             data = {"message": "ALL"}
-            data = json.dumps(data)
-            client.send(bytes(data, encoding=UTF))
-        elif answer=="FROM SB":
+            send(data)
+        elif answer == "FROM SB":
             data = {"message": "NAME"}
-            data = json.dumps(data)
-            client.send(bytes(data, encoding=UTF))
-            data=client.recv(1024)
-            data = data.decode(UTF)
-            #data = json.loads(data)
+            send(data)
+            data = receive()
             print(data)
             from_who=input("Type name of sender")
             data = {"message": from_who}
-            data = json.dumps(data)
-            client.send(bytes(data, encoding=UTF))
-            data = client.recv(1024)
-            data = data.decode(UTF)
-            data = json.loads(data)
+            send(data)
+            data = receive_loads()
             print(data)
-
-
+        elif answer == "QUIT":
+            data = {"message": "QUIT"}
+            send(data)
+            start()
         else:
             print("Try again")
-            #tu musi cofnąć do pytania - answer, w razie co
-        data=client.recv(1024)
-        #data = json.loads(data)
-        data = data.decode(UTF)
+        data = receive()
         print(data)
 
     def send(self):
-        data = {"message": "SEND"}
-        data = json.dumps(data)
-        client.send(bytes(data, encoding=UTF))
-        data = client.recv(1024)
-        data = data.decode(UTF)
-        data2 = json.loads(data)
-        users = data2["message"]
-        question=input(f"Who do you want to send message? List of users: {users}.")
-        data = {"message": question}
-        data = json.dumps(data)
-        client.send(bytes(data, encoding=UTF))
-        data = client.recv(1024)
-        data = data.decode(UTF)
-        message = input("Type message max 255 signs")
-        data = {"message": message}
-        data = json.dumps(data)
-        client.send(bytes(data, encoding=UTF))
-        data = client.recv(1024)
-        data = data.decode(UTF)
+        while True:
+            data = {"message": "SEND"}
+            send(data)
+            data = receive_loads()
+            users = data["message"]
+            question = input(f"Who do you want to send message? List of users: {users}. Type QUIT if want to quit log in mode.")
+            data = {"message": question}
+            if question == "QUIT":
+                send(data)
+                start()
+            else:
+                send(data)
+                receive_loads()
+                message = input("Type message max 255 signs")
+                data = {"message": message}
+                send(data)
+                receive_loads()
+
     
 def client_send(y):
-    data ={}
+    data = {}
     for x in range(len(COMM)): 
-        if COMM[x]==y:
-            data["message"]=y
+        if COMM[x] == y:
+            data["message"] = y
             data = json.dumps(data)
             client.sendall(bytes(data,encoding=UTF))
-            data=client.recv(1024)
-            data = data.decode(UTF)
+            data = receive_loads()
             print(repr(data))
             if repr(data) == {"message": "LOG IN"}:
                 log_in()
             if repr(data) == {"message": "REGISTER"}:
                 print("tuuu")
                 register()
-#czy ta funckja nie powinna być jeszcze pokrojona? i chyba tu już kwestia testów integracyjnych
 
 def start():
     print('You can choose command from list. Type {} to get information about commands.'.format(COMM[2]))
     while True:
-        z=input()
-        client_send(z)
-        if z=="LOG IN":
+        answer = input()
+        print(answer)
+        client_send(answer)
+        if answer =="LOG IN":
             log_in()
-        elif z=="REGISTER":
+        elif answer =="REGISTER":
             register()
-        elif z=="STOP":
+        elif answer =="STOP":
             close_msg = {}
             close_msg["message"] = "STOP"
-            data = json.dumps(close_msg)
-            client.send(bytes(data,encoding=UTF))
+            send(close_msg)
             client.close()
             break
         else:
-            client_send(z)
+            client_send(answer)
 
 def register():
     username=input("Please type your username ;p: ")
     print(username)
     user_data = {}
     user_data["username"] = username
-    data = json.dumps(user_data)
-    client.send(bytes(data,encoding=UTF))
-    data=client.recv(1024)
-    data = data.decode(UTF)
-    data2 = json.loads(data)
-    print(data2)
-    if data2 == {"message":"Username already exists!"}:
+    send(user_data)
+    data = receive_loads()
+    print(data)
+    if data == {"message":"Username already exists!"}:
         print("Registration failed. Try again!")
-    elif data2 == {"message":"Username not exist."}:
+    elif data == {"message":"Username not exist."}:
         password = input("Please enter your password: ")
         user_data = {}
         user_data["password"] = password
-        data = json.dumps(user_data)
-        client.send(bytes(data,encoding=UTF))
-        data=client.recv(1024)
-        data = data.decode(UTF)
-        data2 = json.loads(data)
-        print(data2)
-
-        if data2 == {"message": "OK"}:
-            print(data2)
+        send(data)
+        data = receive_loads(data)
+        print(data)
+        if data == {"message": "OK"}:
+            print(data)
             print("You are able to login. Type command LOG IN")
         else:
-            print(data2)
+            print(data)
             print("Registration failed. Try again!")
 
 def log_in():
@@ -146,26 +125,20 @@ def log_in():
     print(username)
     user_data = {}
     user_data["username"] = username
-    data = json.dumps(user_data)
-    client.send(bytes(data,encoding=UTF))
-    data=client.recv(1024)
-    data = data.decode(UTF)
-    
+    send(user_data)
+    data = receive() 
     print(data)
     print(type(data))
     print(data[-10:-2])
-    if data[-10:-2]=="Password":
+    if data[-10:-2] == "Password":
         password=input("Please enter your password: ")
         print(password)
         user_data={}
-        user_data["password"]=password
-        data = json.dumps(user_data)
-        client.send(bytes(data,encoding=UTF))
-        data=client.recv(1024)
-        data = data.decode(UTF)
-        #A MOŻE BY TAK JSON LOADS?????????????
+        user_data["password"] = password
+        send(user_data)
+        data = receive()
         print(data[-12:-2])
-        if data[-12:-2]=="logged in!":
+        if data[-12:-2] == "logged in!":
             user=User(username)
             print("User logged in!")
             data = client.recv(1024)
@@ -178,16 +151,27 @@ def log_in():
                 user.send()
             elif answer == "QUIT":
                 data = {"message": "QUIT"}
-                data = json.dumps(data)
-                client.send(bytes(data, encoding=UTF))
-                start()
-            
+                send(data)
+                start()      
         else:
             print("Invalid password! Try again!") # zrobić, żeby nie wywalało na początek
     else:
         print("Invalid username! Try again!")
 
-if __name__=="__main__":
+def send(data):
+    data = json.dumps(data)
+    client.send(bytes(data, encoding=UTF))
+
+def receive():
+    data = client.recv(1024)
+    data = data.decode(UTF)
+    return data
+
+def receive_loads():
+    data = client.recv(1024)
+    data = data.decode(UTF)
+    data = json.loads(data)
+    return data
+
+if __name__ == "__main__":
     start()
-
-
