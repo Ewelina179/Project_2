@@ -19,7 +19,7 @@ To open client application:
 
 python client.py
 
-## Technical stack
+## Technology stack
 
 Python
 
